@@ -1,0 +1,152 @@
+/* src/styles/Cart.css */
+.cart-container {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 15px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.cart-container h2 {
+  color: #2c3e50;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.cart-items {
+  margin-bottom: 30px;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.item-info {
+  flex-grow: 1;
+}
+
+.item-info h3 {
+  color: #2c3e50;
+  margin-bottom: 5px;
+}
+
+.item-info p {
+  color: #7f8c8d;
+  font-size: 0.95rem;
+}
+
+.item-total {
+  font-weight: 600;
+  color: #e67e22;
+  margin: 0 20px;
+}
+
+.remove-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 8px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.remove-btn:hover {
+  background: #c0392b;
+}
+
+.cart-summary {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 2px solid #eee;
+  text-align: right;
+}
+
+.cart-summary h3 {
+  color: #e67e22;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+}
+
+.cart-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 15px;
+}
+
+.clear-btn {
+  background: #95a5a6;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.clear-btn:hover {
+  background: #7f8c8d;
+}
+
+.checkout-btn {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.checkout-btn:hover {
+  background: #357abd;
+}
+
+.empty-cart-message {
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.btn-primary {
+  display: inline-block;
+  background: #4a90e2;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 5px;
+  text-decoration: none;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.btn-primary:hover {
+  background: #357abd;
+}
+
+@media (max-width: 768px) {
+  .cart-item {
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+  }
+  
+  .item-total {
+    margin: 10px 0;
+  }
+  
+  .cart-actions {
+    flex-direction: column;
+    align-items: flex-end;
+  }
+}

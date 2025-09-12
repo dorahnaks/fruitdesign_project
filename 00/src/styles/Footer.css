@@ -1,0 +1,334 @@
+/* src/styles/Footer.css */
+.footer {
+  background: #222;
+  color: #fff;
+  padding: 50px 0 20px;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Add subtle decorative element */
+.footer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: linear-gradient(90deg, #f6a21b, #e88f0b);
+}
+
+.footer-columns {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto 30px auto;
+  padding: 0 15px; /* Reduced from 20px to 15px */
+  gap: 30px; /* Reduced from 40px to 30px */
+}
+
+.footer-column {
+  flex: 1 1 200px; /* Increased min-width from 180px to 200px */
+  min-width: 200px;
+  transition: transform 0.3s ease;
+}
+
+.footer-column:hover {
+  transform: translateY(-5px);
+}
+
+.footer-column h4 {
+  margin-bottom: 15px;
+  font-size: 1.2rem;
+  color: #fff;
+  position: relative;
+  padding-bottom: 10px;
+  font-weight: 600;
+}
+
+/* Add underline for headings */
+.footer-column h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 40px;
+  height: 2px;
+  background: #f6a21b;
+}
+
+.footer-column ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.footer-column ul li {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-size: 1rem;
+  color: #e0e0e0;
+}
+
+.footer-column ul li:last-child {
+  margin-bottom: 0;
+}
+
+.footer-column ul li a {
+  color: #e0e0e0;
+  text-decoration: none;
+  transition: color 0.3s ease, padding-left 0.3s ease;
+  display: inline-block;
+}
+
+.footer-column ul li a:hover {
+  color: #f6a21b;
+  padding-left: 5px;
+}
+
+.footer-bottom {
+  border-top: 1px solid #444;
+  text-align: center;
+  padding-top: 20px;
+  font-size: 0.95rem;
+  color: #bbb;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 15px; /* Reduced from 20px to 15px */
+  padding-right: 15px; /* Reduced from 20px to 15px */
+}
+
+.footer-social {
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+/* Updated icon design with header orange color */
+.social-icon-container {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.social-icon-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(246, 162, 27, 0.2);
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.3s ease;
+  z-index: 0;
+}
+
+.social-icon-container:hover {
+  transform: translateY(-5px);
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.social-icon-container:hover::before {
+  transform: scale(1);
+}
+
+.social-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  vertical-align: middle;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+  filter: brightness(0) invert(0.7) sepia(1) hue-rotate(0deg) saturate(7); /* Header orange color */
+}
+
+.social-icon-container:hover .social-icon {
+  transform: scale(1.1);
+  filter: brightness(0) invert(0.6) sepia(1) hue-rotate(0deg) saturate(8); /* Slightly brighter on hover */
+}
+
+/* Add a subtle pulse animation */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(246, 162, 27, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(246, 162, 27, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(246, 162, 27, 0);
+  }
+}
+
+.social-icon-container:hover {
+  animation: pulse 1.5s infinite;
+}
+
+/* Specific icon adjustments */
+.instagram-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.facebook-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.x-icon {
+  width: 20px;
+  height: 20px;
+}
+
+/* Add subtle animation to copyright text */
+.footer-bottom p {
+  animation: fadeIn 1s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Improved responsive design */
+@media (max-width: 992px) {
+  .footer-columns {
+    max-width: 100%;
+    padding: 0 20px;
+  }
+  
+  .footer-bottom {
+    max-width: 100%;
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer {
+    padding: 40px 0 20px;
+  }
+  
+  .footer-columns {
+    flex-direction: column;
+    gap: 25px;
+    align-items: flex-start;
+    padding: 0 15px;
+  }
+  
+  .footer-column {
+    min-width: 0;
+    width: 100%;
+  }
+  
+  .footer-column:hover {
+    transform: none;
+  }
+  
+  .social-icon-container {
+    width: 36px;
+    height: 36px;
+  }
+  
+  .footer-bottom {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+@media (max-width: 576px) {
+  .footer {
+    padding: 30px 0 15px;
+  }
+  
+  .footer-columns {
+    padding: 0 10px;
+    gap: 20px;
+  }
+  
+  .footer-column h4 {
+    font-size: 1.1rem;
+    margin-bottom: 12px;
+  }
+  
+  .footer-column ul li {
+    font-size: 0.95rem;
+    margin-bottom: 10px;
+  }
+  
+  .footer-bottom {
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-top: 15px;
+    font-size: 0.9rem;
+  }
+  
+  .social-icon-container {
+    width: 34px;
+    height: 34px;
+  }
+  
+  .social-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .instagram-icon,
+  .facebook-icon,
+  .x-icon {
+    width: 18px;
+    height: 18px;
+  }
+}
+
+@media (max-width: 400px) {
+  .footer-columns {
+    padding: 0 8px;
+  }
+  
+  .footer-bottom {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+  
+  .footer-column h4 {
+    font-size: 1rem;
+  }
+  
+  .footer-column ul li {
+    font-size: 0.9rem;
+  }
+  
+  .footer-bottom {
+    font-size: 0.85rem;
+  }
+  
+  .social-icon-container {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .social-icon {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .instagram-icon,
+  .facebook-icon,
+  .x-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
