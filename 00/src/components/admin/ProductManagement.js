@@ -441,6 +441,12 @@ const ProductManagement = () => {
     return categories.find(cat => cat.name === categoryName) || { color: '#F57C00' };
   };
   
+  // Add a function to handle image errors
+  const handleImageError = (e) => {
+    console.error('Admin image failed to load:', e.target.src);
+    e.target.src = '/images/product-placeholder.jpg';
+  };
+  
   // Retry fetch products
   const handleRetry = () => {
     setError(null);
@@ -708,6 +714,7 @@ const ProductManagement = () => {
                       objectFit: 'cover',
                       position: 'relative'
                     }}
+                    onError={handleImageError}
                   />
                   <CardContent sx={{ flexGrow: 1, display: 'flex', flexDirection: 'column', p: 2 }}>
                     <Typography gutterBottom variant="h6" component="div" fontWeight="bold" color="#333">
@@ -791,6 +798,7 @@ const ProductManagement = () => {
                               borderRadius: '8px',
                               objectFit: 'cover'
                             }}
+                            onError={handleImageError}
                           />
                           <Box>
                             <Typography variant="body1" sx={{ fontWeight: '500' }}>
@@ -1027,6 +1035,7 @@ const ProductManagement = () => {
                         mb: 2,
                         border: `1px solid ${themeColors.neutral.border}`
                       }}
+                      onError={handleImageError}
                     />
                   ) : (
                     <Avatar

@@ -191,6 +191,11 @@ const Products = () => {
     return filteredProducts.filter(product => product.category === category);
   };
   
+  const handleImageError = (e) => {
+    console.error('Image failed to load:', e.target.src);
+    e.target.src = placeholderImage;
+  };
+  
   if (loading) {
     return (
       <div className="products-container">
@@ -349,6 +354,7 @@ const Products = () => {
                 category={product.category}
                 image={product.image_url || product.image || placeholderImage}
                 stock_quantity={product.stock_quantity}
+                onError={handleImageError}
               />
             ))}
           </div>

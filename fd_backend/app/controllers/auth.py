@@ -145,13 +145,15 @@ def register_customer():
         db.session.add(new_customer)
         db.session.commit()
         
-        # Create access token with consistent identity format
+        # Create tokens with string identity and role in claims
         access_token = create_access_token(
-            identity={'id': new_customer.id, 'role': 'customer'}
+            identity=str(new_customer.id),  # String identity
+            additional_claims={'role': 'customer'}
         )
         
         refresh_token = create_refresh_token(
-            identity={'id': new_customer.id, 'role': 'customer'}
+            identity=str(new_customer.id),  # String identity
+            additional_claims={'role': 'customer'}
         )
         
         current_app.logger.info(f"Customer registered successfully: {email}")
@@ -237,13 +239,15 @@ def login():
         # Commit the last login update
         db.session.commit()
         
-        # Create access token with consistent identity format
+        # Create tokens with string identity and role in claims
         access_token = create_access_token(
-            identity={'id': user.id, 'role': user_type}
+            identity=str(user.id),  # String identity
+            additional_claims={'role': user_type}
         )
         
         refresh_token = create_refresh_token(
-            identity={'id': user.id, 'role': user_type}
+            identity=str(user.id),  # String identity
+            additional_claims={'role': user_type}
         )
         
         # Prepare response data with consistent structure
@@ -287,14 +291,23 @@ def login():
 def refresh():
     """Refresh access token"""
     try:
-        current_user = get_jwt_identity()
-        access_token = create_access_token(identity=current_user)
+        # Get identity (string user ID) and claims from refresh token
+        identity = get_jwt_identity()
+        claims = get_jwt()
+        role = claims.get('role')
+        
+        # Create new access token with same identity and role
+        access_token = create_access_token(
+            identity=identity,  # Already a string
+            additional_claims={'role': role}
+        )
         
         return jsonify({
             'access_token': access_token
         }), HTTP_200_OK
     except Exception as e:
         current_app.logger.error(f"Token refresh error: {str(e)}")
+        current_app.logger.error(traceback.format_exc())
         return jsonify({'error': 'Could not refresh token'}), HTTP_401_UNAUTHORIZED
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -317,10 +330,16 @@ def logout():
 def get_current_user():
     """Get current user information"""
     try:
-        # Get current user from token
+        # Get identity (string user ID) and claims from token
         identity = get_jwt_identity()
-        user_id = identity.get('id')
-        role = identity.get('role')
+        claims = get_jwt()
+        role = claims.get('role')
+        
+        # Convert identity to integer
+        try:
+            user_id = int(identity)
+        except ValueError:
+            return jsonify({'error': 'Invalid user ID in token'}), HTTP_400_BAD_REQUEST
         
         # Find user based on role
         if role == 'customer':
@@ -357,6 +376,7 @@ def get_current_user():
             
     except Exception as e:
         current_app.logger.error(f"Get current user error: {str(e)}")
+        current_app.logger.error(traceback.format_exc())
         return jsonify({'error': 'Failed to get user information'}), HTTP_500_INTERNAL_SERVER_ERROR
 
 @auth_bp.route('/me', methods=['PUT'])
@@ -364,9 +384,16 @@ def get_current_user():
 def update_user_profile():
     """Update current user profile"""
     try:
+        # Get identity (string user ID) and claims from token
         identity = get_jwt_identity()
-        user_id = identity.get('id')
-        role = identity.get('role')
+        claims = get_jwt()
+        role = claims.get('role')
+        
+        # Convert identity to integer
+        try:
+            user_id = int(identity)
+        except ValueError:
+            return jsonify({'error': 'Invalid user ID in token'}), HTTP_400_BAD_REQUEST
         
         data = request.get_json()
         

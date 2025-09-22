@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { handleApiError } from '../utils/errorHandler';
@@ -17,6 +17,16 @@ const Login = () => {
   const location = useLocation();
   const from = location.state?.from?.pathname || '/';
   
+  // Check for checkout intent on component mount
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const checkoutParam = params.get('checkout');
+    
+    if (checkoutParam === 'true') {
+      localStorage.setItem('checkoutIntent', 'true');
+    }
+  }, [location]);
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -30,14 +40,22 @@ const Login = () => {
     setError('');
     
     try {
-      // Get the full response to check role
+      // Get the full response to check role and checkout intent
       const response = await login(formData);
       console.log("Login response:", response);
       
-      // Use the role directly from the response instead of waiting for state update
+      // Check if user was trying to checkout before login
+      const checkoutIntent = localStorage.getItem('checkoutIntent');
+      localStorage.removeItem('checkoutIntent'); // Clear the intent
+      
+      // Use the role directly from the response
       const { role } = response;
       
-      if (role === 'super_admin' || role === 'admin') {
+      // Priority: 1. Checkout intent, 2. Admin redirect, 3. Normal redirect
+      if (checkoutIntent === 'true') {
+        console.log("Redirecting to checkout after login");
+        navigate('/checkout', { replace: true });
+      } else if (role === 'super_admin' || role === 'admin') {
         console.log("Redirecting to admin dashboard");
         navigate('/admin/dashboard', { replace: true });
       } else {
@@ -158,7 +176,6 @@ const Login = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Login;

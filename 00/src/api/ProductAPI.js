@@ -3,21 +3,36 @@ import axios from 'axios';
 // Use the full URL to avoid proxy issues
 const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
 
+// Helper function to convert relative image URL to full URL
+const getFullImageUrl = (image_url) => {
+  if (!image_url) return null;
+  
+  // If it's already a full URL, return as is
+  if (image_url.startsWith('http://') || image_url.startsWith('https://')) {
+    return image_url;
+  }
+  
+  // If it's a relative path starting with /static/, convert to full URL
+  if (image_url.startsWith('/static/')) {
+    const baseUrl = API_BASE_URL.replace('/api/v1', ''); // Remove /api/v1 prefix
+    return `${baseUrl}${image_url}`;
+  }
+  
+  // Fallback: assume it's a relative path to the API
+  return `${API_BASE_URL}/${image_url}`;
+};
+
 const productAPI = {
   // Get all products (public endpoint)
   getPublicProducts: async () => {
     try {
-      const url = `${API_BASE_URL}/products/public`;
-      console.log('Fetching public products from:', url);
-      const response = await axios.get(url);
-      console.log('Public products response:', response.data);
-      return response.data.products;
+      const response = await axios.get(`${API_BASE_URL}/products/public`);
+      return response.data.products.map(product => ({
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      }));
     } catch (error) {
       console.error('Error fetching public products:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
       throw error;
     }
   },
@@ -25,24 +40,17 @@ const productAPI = {
   // Get all products (requires authentication)
   getAllProducts: async (token) => {
     try {
-      const url = `${API_BASE_URL}/products`;
-      console.log('Fetching products from:', url);
-      console.log('Using token:', token ? 'Token provided' : 'No token');
-      
-      const response = await axios.get(url, {
+      const response = await axios.get(`${API_BASE_URL}/products`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
-      
-      console.log('Products response:', response.data);
-      return response.data.products;
+      return response.data.products.map(product => ({
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      }));
     } catch (error) {
       console.error('Error fetching products:', error);
-      if (error.response) {
-        console.error('Response status:', error.response.status);
-        console.error('Response data:', error.response.data);
-      }
       throw error;
     }
   },
@@ -55,7 +63,11 @@ const productAPI = {
           'Authorization': `Bearer ${token}`
         }
       });
-      return response.data.product;
+      const product = response.data.product;
+      return {
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      };
     } catch (error) {
       console.error('Error fetching product:', error);
       throw error;
@@ -71,7 +83,11 @@ const productAPI = {
           'Content-Type': 'multipart/form-data'
         }
       });
-      return response.data;
+      const product = response.data.product;
+      return {
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      };
     } catch (error) {
       console.error('Error creating product:', error);
       throw error;
@@ -87,7 +103,11 @@ const productAPI = {
           'Content-Type': 'multipart/form-data'
         }
       });
-      return response.data;
+      const product = response.data.product;
+      return {
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      };
     } catch (error) {
       console.error('Error updating product:', error);
       throw error;
@@ -115,7 +135,10 @@ const productAPI = {
       const response = await axios.get(`${API_BASE_URL}/products/search`, {
         params: { q: query }
       });
-      return response.data.products;
+      return response.data.products.map(product => ({
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      }));
     } catch (error) {
       console.error('Error searching products:', error);
       throw error;
@@ -126,7 +149,10 @@ const productAPI = {
   getProductsByCategory: async (category) => {
     try {
       const response = await axios.get(`${API_BASE_URL}/products/category/${category}`);
-      return response.data.products;
+      return response.data.products.map(product => ({
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      }));
     } catch (error) {
       console.error('Error fetching products by category:', error);
       throw error;
@@ -137,7 +163,10 @@ const productAPI = {
   getFeaturedProducts: async () => {
     try {
       const response = await axios.get(`${API_BASE_URL}/products/featured`);
-      return response.data.products;
+      return response.data.products.map(product => ({
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      }));
     } catch (error) {
       console.error('Error fetching featured products:', error);
       throw error;
@@ -216,7 +245,10 @@ const productAPI = {
           'Authorization': `Bearer ${token}`
         }
       });
-      return response.data.products;
+      return response.data.products.map(product => ({
+        ...product,
+        image_url: getFullImageUrl(product.image_url)
+      }));
     } catch (error) {
       console.error('Error fetching low stock products:', error);
       throw error;

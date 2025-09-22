@@ -1,4 +1,3 @@
-// src/context/AuthContext.js
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { authAPI } from '../api/AuthAPI';
 
@@ -70,7 +69,7 @@ export const AuthProvider = ({ children }) => {
   // Function to fetch fresh user data from backend
   const fetchUserData = async (token) => {
     try {
-      const response = await authAPI.getCurrentUser(token);
+      const response = await authAPI.getCurrentUser();
       console.log("Fetched fresh user data:", response.data);
       
       // Process the user data to ensure consistent format
@@ -166,63 +165,72 @@ export const AuthProvider = ({ children }) => {
     }, 5000);
   };
 
-  const login = async (credentials) => {
-    try {
-      const response = await authAPI.login(credentials);
-      console.log("Login response:", response);
-      
-      // Extract data from response
-      const { access_token, refresh_token, user, role } = response.data;
-      
-      // If user is undefined, we can't proceed
-      if (!user) {
-        console.error('User data not found in response:', response.data);
-        throw new Error('User data not received from server');
-      }
-      
-      // Try to fetch fresh user data from backend, but don't fail if it doesn't work
-      let freshUserData;
-      try {
-        freshUserData = await fetchUserData(access_token);
-      } catch (error) {
-        console.warn('Failed to fetch fresh user data, using login response data:', error);
-        freshUserData = null;
-      }
-      
-      // Use fresh data if available, otherwise use the data from login response
-      const userData = freshUserData || user;
-      
-      // Ensure user object has required fields
-      const userWithRole = { 
-        ...userData, 
-        role: role || userData.role || 'customer'
-      };
-      
-      console.log("Processed user data:", userWithRole);
-      
-      // Update state
-      setToken(access_token);
-      setUser(userWithRole);
-      setIsAuthenticated(true);
-      
-      // Update storage
-      storage.auth.setToken(access_token);
-      storage.auth.setRefreshToken(refresh_token);
-      storage.auth.setUser(userWithRole);
-      storage.auth.setUserRole(userWithRole.role);
-      storage.auth.setUserId(userWithRole.id);
-      
-      // Return user with role for redirection
-      return { user: userWithRole, role: userWithRole.role };
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  };
 
-  const register = async (userData) => {
+
+const login = async (credentials) => {
+  try {
+    const response = await authAPI.login(credentials);
+    console.log("Login response:", response);
+    
+    // Extract data from response
+    const { access_token, refresh_token, user, role } = response.data;
+    
+    // If user is undefined, we can't proceed
+    if (!user) {
+      console.error('User data not found in response:', response.data);
+      throw new Error('User data not received from server');
+    }
+    
+    // Try to fetch fresh user data from backend, but don't fail if it doesn't work
+    let freshUserData;
     try {
-      const response = await authAPI.registerCustomer(userData);
+      freshUserData = await fetchUserData(access_token);
+    } catch (error) {
+      console.warn('Failed to fetch fresh user data, using login response data:', error);
+      freshUserData = null;
+    }
+    
+    // Use fresh data if available, otherwise use the data from login response
+    const userData = freshUserData || user;
+    
+    // Ensure user object has required fields
+    const userWithRole = { 
+      ...userData, 
+      role: role || userData.role || 'customer'
+    };
+    
+    console.log("Processed user data:", userWithRole);
+    
+    // Update state
+    setToken(access_token);
+    setUser(userWithRole);
+    setIsAuthenticated(true);
+    
+    // Update storage
+    storage.auth.setToken(access_token);
+    storage.auth.setRefreshToken(refresh_token);
+    storage.auth.setUser(userWithRole);
+    storage.auth.setUserRole(userWithRole.role);
+    storage.auth.setUserId(userWithRole.id);
+    
+    // Check if user was trying to checkout before login
+    const checkoutIntent = localStorage.getItem('checkoutIntent');
+    if (checkoutIntent === 'true') {
+      localStorage.removeItem('checkoutIntent');
+      return { user: userWithRole, role: userWithRole.role, redirect: '/checkout' };
+    }
+    
+    // Return user with role for redirection
+    return { user: userWithRole, role: userWithRole.role };
+  } catch (error) {
+    console.error('Login failed:', error);
+    throw error;
+  }
+};
+
+  const register = async (registerData) => {
+    try {
+      const response = await authAPI.registerCustomer(registerData);
       console.log("Registration response:", response);
       
       // Extract data from response
@@ -244,12 +252,12 @@ export const AuthProvider = ({ children }) => {
       }
       
       // Use fresh data if available, otherwise use the data from registration response
-      const userData = freshUserData || user;
+      const processedUserData = freshUserData || user;
       
       // Ensure user object has required fields
       const userWithName = { 
-        ...userData, 
-        role: role || userData.role || 'customer'
+        ...processedUserData, 
+        role: role || processedUserData.role || 'customer'
       };
       
       console.log("Processed user data:", userWithName);

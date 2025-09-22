@@ -212,8 +212,8 @@ export const CartProvider = ({ children }) => {
     }
   };
 
-  // Checkout
-  const checkout = async () => {
+  // Updated Checkout function to accept order details
+  const checkout = async (orderDetails) => {
     try {
       setIsLoading(true);
       
@@ -221,7 +221,9 @@ export const CartProvider = ({ children }) => {
       if (!token) {
         throw new Error('User not authenticated');
       }
-      const response = await cartAPI.checkout(token);
+      
+      // Pass order details to the checkout API
+      const response = await cartAPI.checkout(token, orderDetails);
       
       // Clear cart after successful checkout
       storage.cart.clearCart();
@@ -247,7 +249,7 @@ export const CartProvider = ({ children }) => {
     stockError,
     addToCart,
     removeFromCart,
-    updateCartItem,  // Keep the original function name
+    updateCartItem,
     clearCart,
     loadCartFromBackend,
     checkout,

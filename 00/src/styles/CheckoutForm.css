@@ -1,80 +1,282 @@
+/* src/styles/CheckoutForm.css */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&family=Lato:wght@400;700&display=swap');
+
 .checkout-container {
-  padding: 20px;
   max-width: 800px;
-  margin: 0 auto;
+  margin: 40px auto;
+  padding: 30px;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+  font-family: 'Lato', sans-serif;
 }
 
-h1 {
+.checkout-container h1 {
+  color: #2c3e50;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
   text-align: center;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 700;
+  position: relative;
+  padding-bottom: 15px;
+}
+
+.checkout-container h1:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 3px;
+  background: linear-gradient(135deg, #f6a21b, #e88f0b);
+  border-radius: 3px;
+}
+
+.login-prompt {
+  text-align: center;
+  padding: 30px;
+  background: rgba(246, 162, 27, 0.05);
+  border-radius: 12px;
+  border: 2px dashed #f6a21b;
   margin-bottom: 30px;
 }
 
-.login-reminder {
-  text-align: center;
-  margin-bottom: 30px;
-  padding: 20px;
-  background-color: #f8f9fa;
+.login-prompt p {
+  font-size: 1.2rem;
+  color: #7f8c8d;
+  margin-bottom: 20px;
+}
+
+.login-prompt .btn-primary {
+  display: inline-block;
+  background: linear-gradient(135deg, #f6a21b, #e88f0b);
+  color: white;
+  padding: 12px 25px;
   border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  font-family: 'Quicksand', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.login-prompt .btn-primary:hover {
+  background: linear-gradient(135deg, #e88f0b, #d17f0a);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(246, 162, 27, 0.3);
 }
 
 .checkout-form {
-  background-color: #f8f9fa;
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
 }
 
 .order-items {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.order-items h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
   margin-bottom: 20px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.order-items h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(135deg, #f6a21b, #e88f0b);
+  border-radius: 2px;
 }
 
 .order-item {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.order-item:last-child {
+  border-bottom: none;
 }
 
 .order-total {
   text-align: right;
-  font-weight: bold;
-  font-size: 1.2em;
-  margin-top: 10px;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: #2c3e50;
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #eee;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.delivery-info, .payment-info {
+  background: #f8f9fa;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.delivery-info h2, .payment-info h2 {
+  color: #2c3e50;
+  font-size: 1.5rem;
+  margin-bottom: 20px;
+  font-family: 'Quicksand', sans-serif;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+}
+
+.delivery-info h2:after, .payment-info h2:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(135deg, #f6a21b, #e88f0b);
+  border-radius: 2px;
 }
 
 .form-group {
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .form-group label {
   display: block;
-  margin-bottom: 5px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2c3e50;
+  font-family: 'Quicksand', sans-serif;
 }
 
-.form-group input {
+.form-group input, .form-group textarea {
   width: 100%;
-  padding: 8px;
+  padding: 12px 15px;
   border: 1px solid #ddd;
-  border-radius: 4px;
+  border-radius: 8px;
+  font-family: 'Lato', sans-serif;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus, .form-group textarea:focus {
+  outline: none;
+  border-color: #f6a21b;
+  box-shadow: 0 0 0 3px rgba(246, 162, 27, 0.1);
 }
 
 .payment-options {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
 .payment-options label {
-  margin-right: 15px;
+  display: flex;
+  align-items: center;
+  padding: 15px;
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.payment-options label:hover {
+  border-color: #f6a21b;
+  background: rgba(246, 162, 27, 0.05);
+}
+
+.payment-options input[type="radio"] {
+  margin-right: 10px;
+  width: 18px;
+  height: 18px;
+  accent-color: #f6a21b;
 }
 
 .btn-primary {
-  background-color: #fc823b;
+  background: linear-gradient(135deg, #f1c40f, #f39c12);
   color: white;
   border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
+  padding: 15px 25px;
+  border-radius: 8px;
   cursor: pointer;
+  font-weight: 600;
+  font-family: 'Quicksand', sans-serif;
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
   width: 100%;
+  margin-top: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .btn-primary:hover {
-  background-color: #f88f49;
+  background: linear-gradient(135deg, #f39c12, #e67e22);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(241, 196, 15, 0.3);
+}
+
+.btn-primary:disabled {
+  background: #95a5a6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.btn-primary:before {
+  content: "💳";
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+  .checkout-container {
+    padding: 20px;
+    margin: 20px 10px;
+  }
+  
+  .checkout-container h1 {
+    font-size: 1.8rem;
+  }
+  
+  .order-items, .delivery-info, .payment-info {
+    padding: 15px;
+  }
+  
+  .order-items h2, .delivery-info h2, .payment-info h2 {
+    font-size: 1.3rem;
+  }
 }

@@ -89,7 +89,7 @@ const Header = () => {
     <header className="header">
       <div className="logo-container">
         <img src={logo} alt="Fruit Logo" />
-        <span className="brand-name">FreshFruits</span>
+        <span className="brand-name">FruitDesign</span>
       </div>
       
       {/* Navigation menu */}

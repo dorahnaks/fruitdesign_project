@@ -11,7 +11,8 @@ import {
   Card,
   CardContent,
   Chip,
-  Alert
+  Alert,
+  Paper
 } from '@mui/material';
 import { 
   Phone, 
@@ -20,7 +21,9 @@ import {
   Map, 
   Save,
   Public,
-  ContactPhone
+  ContactPhone,
+  Refresh,
+  BugReport
 } from '@mui/icons-material';
 import { useAuth } from '../../context/AuthContext';
 import contactAPI from '../../api/ContactAPI';
@@ -46,20 +49,22 @@ const ContactSettings = () => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState(null);
   const [connectionStatus, setConnectionStatus] = useState('unknown');
+  const [apiResponse, setApiResponse] = useState(null); // For debugging
+
+  // Test connection function
+  const testConnection = async () => {
+    try {
+      await contactAPI.testConnection();
+      setConnectionStatus('connected');
+      fetchContactInfo();
+    } catch (error) {
+      setConnectionStatus('disconnected');
+      setError('Cannot connect to the backend server. Please ensure it is running.');
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const testConnection = async () => {
-      try {
-        await contactAPI.getContactInfo();
-        setConnectionStatus('connected');
-        fetchContactInfo();
-      } catch (error) {
-        setConnectionStatus('disconnected');
-        setError('Cannot connect to the backend server. Please ensure it is running.');
-        setLoading(false);
-      }
-    };
-    
     testConnection();
   }, []);
 
@@ -68,20 +73,28 @@ const ContactSettings = () => {
       setLoading(true);
       setError(null);
       
-      const response = await contactAPI.getContactInfo();
+      const response = await contactAPI.getContactInfoForAdmin();
+      console.log('Admin panel received response:', response); // Debug log
+      setApiResponse(response); // Store raw response for debugging
       
-      setContactInfo({
-        phone: response.phone || '',
-        email: response.email || '',
-        location: response.location || '',
-        mapLink: response.map_link || '',
-        socialMedia: response.social_media_links || {
-          facebook: '',
-          twitter: '',
-          instagram: '',
-          linkedin: ''
-        }
-      });
+      // Check if response has the expected structure
+      if (response && typeof response === 'object') {
+        setContactInfo({
+          phone: response.phone || 'O777',
+          email: response.email || '',
+          location: response.location || '',
+          mapLink: response.map_link || '',
+          socialMedia: response.social_media_links || {
+            facebook: '',
+            twitter: '',
+            instagram: '',
+            linkedin: ''
+          }
+        });
+      } else {
+        console.error('Invalid response structure:', response);
+        setError('Invalid data structure received from server');
+      }
       
       setLoading(false);
     } catch (error) {
@@ -112,6 +125,20 @@ const ContactSettings = () => {
       return;
     }
     
+    // Validate required fields
+    if (!contactInfo.phone.trim()) {
+      setError('Phone number is required');
+      return;
+    }
+    if (!contactInfo.email.trim()) {
+      setError('Email address is required');
+      return;
+    }
+    if (!contactInfo.location.trim()) {
+      setError('Location is required');
+      return;
+    }
+    
     setSubmitting(true);
     setError(null);
     
@@ -124,10 +151,15 @@ const ContactSettings = () => {
         social_media_links: contactInfo.socialMedia
       };
       
+      console.log('Saving data:', dataToSave); // Debug log
       const response = await contactAPI.updateContactInfo(dataToSave, token);
+      console.log('Save response:', response); // Debug log
       
       setSuccess(true);
       setIsEditing(false);
+      
+      // Refresh data after save
+      await fetchContactInfo();
       
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
@@ -164,6 +196,16 @@ const ContactSettings = () => {
           }}>
             {connectionStatus === 'connected' ? 'Connected' : 'Disconnected'}
           </span>
+          {connectionStatus === 'disconnected' && (
+            <Button 
+              size="small" 
+              onClick={testConnection}
+              startIcon={<Refresh />}
+              sx={{ ml: 1 }}
+            >
+              Retry
+            </Button>
+          )}
         </Typography>
       </Box>
       
@@ -216,11 +258,12 @@ const ContactSettings = () => {
               <TextField
                 fullWidth
                 margin="normal"
-                label="Phone Number"
+                label="Phone Number *"
                 name="phone"
                 value={contactInfo.phone}
                 onChange={handleChange}
                 disabled={!isEditing}
+                required
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -236,11 +279,12 @@ const ContactSettings = () => {
               <TextField
                 fullWidth
                 margin="normal"
-                label="Email Address"
+                label="Email Address *"
                 name="email"
                 value={contactInfo.email}
                 onChange={handleChange}
                 disabled={!isEditing}
+                required
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -256,13 +300,14 @@ const ContactSettings = () => {
               <TextField
                 fullWidth
                 margin="normal"
-                label="Physical Location"
+                label="Physical Location *"
                 name="location"
                 value={contactInfo.location}
                 onChange={handleChange}
                 disabled={!isEditing}
                 multiline
                 rows={2}
+                required
                 InputProps={{
                   startAdornment: (
                     <InputAdornment position="start">
@@ -503,6 +548,22 @@ const ContactSettings = () => {
               </Box>
             )}
           </Card>
+          
+          {/* Debug Panel - Remove in production */}
+          <Paper sx={{ p: 2, mt: 3, backgroundColor: '#f5f5f5' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <BugReport sx={{ mr: 1 }} />
+              <Typography variant="h6">Debug Information</Typography>
+            </Box>
+            <Typography variant="body2">API Response:</Typography>
+            <pre style={{ fontSize: '12px', overflow: 'auto', maxHeight: '200px' }}>
+              {JSON.stringify(apiResponse, null, 2)}
+            </pre>
+            <Typography variant="body2" sx={{ mt: 1 }}>Current State:</Typography>
+            <pre style={{ fontSize: '12px', overflow: 'auto', maxHeight: '200px' }}>
+              {JSON.stringify(contactInfo, null, 2)}
+            </pre>
+          </Paper>
         </CardContent>
       </Card>
     </Box>

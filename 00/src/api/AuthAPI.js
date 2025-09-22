@@ -3,11 +3,18 @@ import api from './axiosConfig';
 
 export const authAPI = {
   login: async (credentials) => {
+    // async is the keyword that allows us to use await inside the function. 
+    // await makes JavaScript wait until that promise settles and returns its result. 
+    // meaning it pauses the function execution until the promise is resolved or rejected. 
+    // the promise can be a network request, a timer, or any asynchronous operation.
     try {
       const response = await api.post('auth/login', credentials);
       console.log('Login API response:', response);
       console.log('Login API response data:', response.data);
-      
+      // await is used here in a way that the function will wait for the api.post to complete before moving on to the next line of code.
+      // it ensures that we have the response data available before we try to access it. 
+      // response.data is where axios stores the actual response body from the server.
+
       if (!response.data) {
         throw new Error('No data received from server');
       }
@@ -83,7 +90,7 @@ export const authAPI = {
   
   refreshToken: async (refreshToken) => {
     try {
-      const response = await axios.post(`${api.defaults.baseURL}/api/v1/auth/refresh`, {}, {
+      const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {}, {
         headers: {
           Authorization: `Bearer ${refreshToken}`
         }
@@ -110,7 +117,7 @@ export const authAPI = {
   
   logout: async () => {
     try {
-      const response = await api.post('/api/v1/auth/logout');
+      const response = await api.post('/auth/logout');
       console.log('Logout response:', response);
       return response;
     } catch (error) {
@@ -121,7 +128,7 @@ export const authAPI = {
   
   getCurrentUser: async (token) => {
     try {
-      const response = await api.get('/api/v1/auth/me', {
+      const response = await api.get('/auth/me', {
         headers: {
           Authorization: `Bearer ${token}`
         }
@@ -158,7 +165,7 @@ export const authAPI = {
         address: typeof userData.address
       });
       
-      const response = await api.put('/api/v1/auth/me', userData);
+      const response = await api.put('/auth/me', userData);
       console.log('Update user response status:', response.status);
       console.log('Update user response data:', response.data);
       console.log('=== END AUTH API DEBUG ===');

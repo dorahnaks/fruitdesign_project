@@ -1,9 +1,8 @@
-// src/api/axiosConfig.js
 import axios from 'axios';
 import { storage } from '../utils/storage';
 
-// Explicitly set the baseURL to HTTP (not HTTPS)
-const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+// Explicitly set the baseURL to include the API path
+const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api/v1';
 
 console.log('API baseURL:', baseURL);
 
@@ -80,7 +79,7 @@ api.interceptors.response.use(
         const refreshToken = storage.auth.getRefreshToken();
         if (refreshToken) {
           try {
-            const response = await axios.post(`${api.defaults.baseURL}/api/v1/auth/refresh`, {}, {
+            const response = await axios.post(`${api.defaults.baseURL}/auth/refresh`, {}, {
               headers: {
                 Authorization: `Bearer ${refreshToken}`
               }

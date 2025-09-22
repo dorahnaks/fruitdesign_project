@@ -11,6 +11,7 @@ const Contact = () => {
   const [error, setError] = useState(null);
   const [feedbackSubmitted, setFeedbackSubmitted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [apiResponse, setApiResponse] = useState(null); // For debugging
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -21,6 +22,8 @@ const Contact = () => {
       try {
         setLoading(true);
         const response = await contactAPI.getContactInfo();
+        console.log('Contact component received response:', response); // Debug log
+        setApiResponse(response); // Store raw response for debugging
         setContactInfo(response);
         setError(null);
       } catch (err) {
@@ -52,6 +55,8 @@ const Contact = () => {
   };
 
   const renderContactInfo = () => {
+    console.log('Rendering contact info. State:', { contactInfo, loading, error, apiResponse }); // Debug log
+    
     if (loading) {
       return <div className="loading">Loading contact information...</div>;
     }
@@ -155,6 +160,12 @@ const Contact = () => {
             </div>
           </div>
         )}
+        
+        {/* Debug Information - Remove in production */}
+        <div style={{ marginTop: '20px', padding: '10px', backgroundColor: '#f5f5f5', borderRadius: '5px' }}>
+          <h4>Debug Information</h4>
+          <pre>{JSON.stringify(apiResponse, null, 2)}</pre>
+        </div>
       </div>
     );
   };

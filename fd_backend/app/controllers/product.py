@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from app.models.product import Product
 from app.models.content import BestSeller
 from app.extensions import db
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask_jwt_extended import jwt_required, get_jwt_identity, get_jwt
 from app.status_codes import (
     HTTP_200_OK, HTTP_201_CREATED, HTTP_400_BAD_REQUEST,
     HTTP_404_NOT_FOUND, HTTP_401_UNAUTHORIZED, HTTP_500_INTERNAL_SERVER_ERROR
@@ -10,8 +10,92 @@ from app.status_codes import (
 import os
 from werkzeug.utils import secure_filename
 
+from PIL import Image # Pillow is a popular image processing library. It is a fork of the original PIL (Python Imaging Library).
+# it provides easy-to-use methods for opening, manipulating, and saving many different image file formats.
+
+# Define the Blueprint for products
 product_bp = Blueprint('product', __name__, url_prefix='/api/v1/products')
 
+
+
+def get_upload_folder():
+    """
+    Get the upload folder path from app config or calculate it.
+    """
+    if 'UPLOAD_FOLDER' in current_app.config:
+        return os.path.join(current_app.config['UPLOAD_FOLDER'], 'product_images')
+    
+    # Fallback: Calculate the path relative to the app root
+    app_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(app_root, 'static', 'uploads', 'product_images')
+
+def validate_image(file):
+    """Validate uploaded image file"""
+    if not file:
+        return None, "No file provided"
+    
+    # Check file extension
+    allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+    filename = secure_filename(file.filename)
+    file_ext = os.path.splitext(filename)[1].lower()
+    
+    if file_ext not in allowed_extensions:
+        return None, f"Invalid file type. Allowed types: {', '.join(allowed_extensions)}"
+    
+    # Check file size (limit to 5MB)
+    if file.content_length > 5 * 1024 * 1024:
+        return None, "File size exceeds 5MB limit"
+    
+    return filename, None
+
+def optimize_image(file_path, max_size=(800, 800)):
+    """Optimize image to reduce file size"""
+    try:
+        img = Image.open(file_path)
+        
+        # Convert to RGB if needed (for JPEG)
+        if img.mode in ('RGBA', 'P'):
+            img = img.convert('RGB')
+        
+        # Resize if needed while maintaining aspect ratio
+        img.thumbnail(max_size, Image.LANCZOS)
+        
+        # Save with optimization
+        img.save(file_path, optimize=True, quality=85)
+        return True
+    except Exception as e:
+        current_app.logger.error(f"Error optimizing image: {e}")
+        return False
+
+def handle_file_upload(file):
+    """
+    Helper function to handle file upload and return the image URL.
+    """
+    if not file:
+        return None
+    
+    filename, error = validate_image(file)
+    if error:
+        current_app.logger.error(f"Image validation error: {error}")
+        return None
+    
+    upload_folder = get_upload_folder()
+    os.makedirs(upload_folder, exist_ok=True)
+    file_path = os.path.join(upload_folder, filename)
+    
+    try:
+        file.save(file_path)
+        
+        # Optimize the image
+        optimize_image(file_path)
+        
+        # Return a URL without the /api/v1 prefix
+        return f"/static/uploads/product_images/{filename}"
+    except Exception as e:
+        current_app.logger.error(f"Error saving file: {e}")
+        return None
+
+# ... rest of the product_bp code remains the same ...
 def get_upload_folder():
     """
     Get the upload folder path from app config or calculate it.
@@ -39,22 +123,44 @@ def handle_file_upload(file):
     
     try:
         file.save(file_path)
-        # Return a complete URL including the domain
-        return f"{request.host_url}static/uploads/product_images/{filename}"
+        # Return a URL without the /api/v1 prefix
+        return f"/static/uploads/product_images/{filename}"
     except Exception as e:
         current_app.logger.error(f"Error saving file: {e}")
         return None
+
+def parse_boolean(value):
+    """
+    Helper function to parse boolean values from various input types.
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        return value.lower() in ('true', '1', 'yes', 'on')
+    if isinstance(value, int):
+        return value == 1
+    return bool(value)
 
 def is_admin():
     """
     Check if the current user has admin privileges.
     """
+    try:
+        # First try to get role from JWT claims
+        claims = get_jwt()
+        if claims and 'role' in claims:
+            role = claims.get('role')
+            return role in ['admin', 'super_admin', 'superadmin']
+    except Exception as e:
+        current_app.logger.error(f"Error getting JWT claims: {str(e)}")
+    
+    # Fallback: Check identity format
     identity = get_jwt_identity()
     
     # Handle dictionary format
     if isinstance(identity, dict):
         role = identity.get('role')
-        return role in ['admin', 'super_admin']
+        return role in ['admin', 'super_admin', 'superadmin']
     
     # Handle string format
     elif isinstance(identity, str):
@@ -67,8 +173,21 @@ def is_admin():
             import json
             identity = json.loads(identity)
             role = identity.get('role')
-            return role in ['admin', 'super_admin']
+            return role in ['admin', 'super_admin', 'superadmin']
         except json.JSONDecodeError:
+            return False
+    
+    # Handle integer format (user ID)
+    elif isinstance(identity, int):
+        try:
+            # Import here to avoid circular imports
+            from app.models.admin_user import AdminUser as User
+            user = User.query.get(identity)
+            if user:
+                return user.role in ['admin', 'super_admin', 'superadmin']
+            return False
+        except Exception as e:
+            current_app.logger.error(f"Error checking admin status: {str(e)}")
             return False
     
     return False
@@ -156,8 +275,8 @@ def create_product():
         price = float(request.form['price'])
         category = request.form['category']
         stock_quantity = int(request.form.get('stock_quantity', 0))
-        is_active = request.form.get('is_active', 'True').lower() in ['true', '1', 'yes', 'on']
-        is_featured = request.form.get('is_featured', 'False').lower() in ['true', '1', 'yes', 'on']
+        is_active = parse_boolean(request.form.get('is_active', 'True'))
+        is_featured = parse_boolean(request.form.get('is_featured', 'False'))
         
         # Validate data
         if not name or not name.strip():
@@ -238,8 +357,8 @@ def update_product(product_id):
             category = data.get('category', product.category)
             stock_quantity = data.get('stock_quantity', product.stock_quantity)
             image_url = data.get('image_url', product.image_url)
-            is_active = data.get('is_active', product.is_active)
-            is_featured = data.get('is_featured', product.is_featured)
+            is_active = parse_boolean(data.get('is_active', product.is_active))
+            is_featured = parse_boolean(data.get('is_featured', product.is_featured))
         else:
             name = request.form.get('name', product.name)
             description = request.form.get('description', product.description)
@@ -247,13 +366,20 @@ def update_product(product_id):
             category = request.form.get('category', product.category)
             stock_quantity = request.form.get('stock_quantity', product.stock_quantity)
             image_url = request.form.get('image_url', product.image_url)
-            is_active = request.form.get('is_active', product.is_active)
-            is_featured = request.form.get('is_featured', product.is_featured)
+            is_active = parse_boolean(request.form.get('is_active', product.is_active))
+            is_featured = parse_boolean(request.form.get('is_featured', product.is_featured))
             
             # Handle file upload if present
             file = request.files.get('image')
             if file:
                 image_url = handle_file_upload(file)
+        
+        # Convert price and stock_quantity to appropriate types
+        try:
+            price = float(price) if price is not None else product.price
+            stock_quantity = int(stock_quantity) if stock_quantity is not None else product.stock_quantity
+        except (ValueError, TypeError):
+            return jsonify({'error': 'Invalid price or stock quantity'}), HTTP_400_BAD_REQUEST
         
         # Update product attributes
         product.name = name
